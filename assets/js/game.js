@@ -5,6 +5,12 @@ var randomNumber = function (min, max) {
     return value;
 };
 
+// function randomNumber(min, max) {
+//     var value = Math.floor(Math.random() * (max - min + 1) + min);
+
+//     return value;
+// };
+
 //fight or skip function
 var fightOrSkip = function () {
     //ask player if they'd like to fight or skip using fightOrSkip function
@@ -18,22 +24,23 @@ var fightOrSkip = function () {
 
     //if player picks "skip" confirm and then stop the loop
     promptFight = promptFight.toLowerCase();
-    if (promptFight === "skip" || promptFight === "SKIP") {
+
+    if (promptFight === "skip") {
         //confirm player wants to skip
-        var confrimSkip = window.confirm("are you sure you'd like to quit?");
+        var confrimSkip = window.confirm("Are you sure you'd like to quit?");
 
         //if yes(true), leave fight
         if (confrimSkip) {
             window.alert(playerInfo.name + " has decided to skip this fight. Goodbye!");
             //subtract money from playerMoney for skipping
-            playerInfo.playerMoney = playerInfo.money - 10;
-            shop();
+            playerInfo.money = Math.max(0, playerInfo.money - 10);
 
             //return true if player wants to leave
             return true;
         }
     }
-}
+    return false;
+};
 
 //fight function (now with parameter for enemy's name)
 var fight = function (enemy) {
@@ -78,11 +85,9 @@ var fight = function (enemy) {
 
             //player gets attacked first
         } else {
-
             //Subtract the value of 'enemy.attack' from the value of 'playerInfo.health' and use that result to update the value in the 'playerInfo.health variable.
             var damage = randomNumber(enemy.attack - 3, enemy.attack);
             playerInfo.health = Math.max(0, playerInfo.health - damage);
-
             console.log(
                 enemy.name + " attacked " + playerInfo.name + ". " + playerInfo.name + " now has " + playerInfo.health + " health remaining."
             );
@@ -107,12 +112,16 @@ var startGame = function () {
 
     //fight each enemy robot looping over them and fighting them one at a time
     for (var i = 0; i < enemyInfo.length; i++) {
+        console.log(playerInfo);
         //fif player is still alive, keep fighting
         if (playerInfo.health > 0) {
             window.alert("Welcome to Robot Gladiators! Round " + (i + 1));
 
             var pickedEnemyObj = enemyInfo[i];
             pickedEnemyObj.health = randomNumber(40, 60);
+
+            console.log(pickedEnemyObj);
+
             fight(pickedEnemyObj);
 
             //if we're not at the last enemy in the array
@@ -142,11 +151,20 @@ var startGame = function () {
 var endGame = function () {
     window.alert("The game has now ended. Let's see how you did!");
 
-    //if player is still alive, player wins!
-    if (playerInfo.health > 0) {
-        window.alert("Great job, you've survived the game! You now have a score of " + playerInfo.money + ".")
+    //check localStorage for high score, if it's not there, use 0
+    var highScore = localStorage.getItem("highscore");
+    if (highScore === null) {
+        highScore = 0;
+    }
+
+    //if player has more money than the high score, player has new high score
+    if (playerInfo.money > highScore) {
+        localStorage.setItem("highscore", playerInfo.money);
+        localStorage.setItem("name", playerInfo.name);
+
+        alert(playerInfo.name + " now has the high score of " + playerInfo.money + "!");
     } else {
-        window.alert("You've lost your robot in battle.");
+        alert(playerInfo.name + " did not beat the high score of " + highScore + ". Maybe next time!");
     }
 
     //ask payer if they'd like to play again
@@ -166,7 +184,7 @@ var shop = function () {
         "Would you like to REFILL you health, UPGRADE your attack, or LEAVE the store? Please enter 1 for REFILL, 2 for UPGRADE, or 3 for LEAVE."
     );
 
-    shopOptionPrompt - parseInt(shopOptionPrompt);
+    shopOptionPrompt = parseInt(shopOptionPrompt);
 
     //use switch to carry out action
     switch (shopOptionPrompt) {
